@@ -50,7 +50,3 @@ class SleeperData:
 
     def setDraftId(self, draft_id):
         self.__draft_id = draft_id
-
-
-    def test(self):
-        print(requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId()}/picks").json())
