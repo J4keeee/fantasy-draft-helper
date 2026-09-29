@@ -6,7 +6,6 @@ class SleeperData:
     __league_id = None
     __draft_id = None
 
-
     def __init__(self, user_name="", league_id="", draft_id=""):
         self.setUserName(user_name)
         self.setLeagueId(league_id)
@@ -15,22 +14,22 @@ class SleeperData:
     # HELPERS
     def getUserData(self) -> str:
         """Get the data for a sleeper user"""
-        data_request = requests.get(f"https://api.sleeper.app/v1/user/{self.getUserName}")
+        data_request = requests.get(f"https://api.sleeper.app/v1/user/{self.getUserName()}")
         return data_request.json()
 
     def getLeagueData(self) -> str:
         """Get data for a specific league"""
-        data_request = requests.get(f"https://api.sleeper.app/v1/league/{self.getLeagueId}")
+        data_request = requests.get(f"https://api.sleeper.app/v1/league/{self.getLeagueId()}")
         return data_request.json()
 
     def getDraftData(self) -> str:
         """Get data for a specific draft"""
-        data_request = requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId}")
+        data_request = requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId()}")
         return data_request.json()
 
     def getDraftPicks(self) -> str:
         """Get picks for a draft"""
-        data_request = requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId}/picks")
+        data_request = requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId()}/picks")
         return data_request.json()
 
     # GETTERS AND SETTERS
@@ -51,3 +50,7 @@ class SleeperData:
 
     def setDraftId(self, draft_id):
         self.__draft_id = draft_id
+
+
+    def test(self):
+        print(requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId()}/picks").json())
