@@ -1,0 +1,17 @@
+10/12/2026 To Do
+
+- Work on UI
+	* Allow user to give us ID's for sleeper API
+- Determine update indicator
+- Loop Logic
+	* Constantly check the round regardless of user input
+	* Update specific information when draft click
+	* Experiment with grabs draft picks at beginning of round
+	* Check information against current user position for changes
+- See if model can do online searching
+- Make presentation (5 slides)
+	1. What is our project?
+	2. Why is our project useful?
+	3. Our project in action.
+	4. Data/Code behind the program
+	5. Future of the project/Reflections
