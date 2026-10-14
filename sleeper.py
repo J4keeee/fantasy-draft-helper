@@ -1,3 +1,6 @@
+import ast
+import json
+
 import requests
 
 class SleeperData:
@@ -5,11 +8,13 @@ class SleeperData:
     __user_name = None
     __league_id = None
     __draft_id = None
+    __draft_order = -1
 
-    def __init__(self, user_name="", league_id="", draft_id=""):
+    def __init__(self, user_name="", league_id="", draft_id="", draft_order = -1):
         self.setUserName(user_name)
         self.setLeagueId(league_id)
         self.setDraftId(draft_id)
+        self.setDraftOrder(draft_order)
 
     # HELPERS
     def getUserData(self) -> str:
@@ -32,6 +37,12 @@ class SleeperData:
         data_request = requests.get(f"https://api.sleeper.app/v1/draft/{self.getDraftId()}/picks")
         return data_request.json()
 
+    def saveAllPlayers(self) -> None:
+        """Only use once a day to generate daily info"""
+        data_request = requests.get(f"https://api.sleeper.app/v1/players/nfl?active=true")
+        with open("updated_players.txt", "w") as f:
+            f.write(str(data_request.json()))
+
     # GETTERS AND SETTERS
     def getUserName(self):
         return self.__user_name
@@ -42,6 +53,9 @@ class SleeperData:
     def getDraftId(self):
         return self.__draft_id
 
+    def getDraftOrder(self):
+        return self.__draft_order
+
     def setUserName(self, user_name):
         self.__user_name = user_name
 
@@ -50,3 +64,22 @@ class SleeperData:
 
     def setDraftId(self, draft_id):
         self.__draft_id = draft_id
+
+    def setDraftOrder(self, draft_order):
+        self.__draft_order = draft_order
+
+    def filterPlayersFile(self):
+        with open("updated_players.txt", "r") as f:
+            players_file = f.read()
+        players = ast.literal_eval(players_file)
+        player_ids = list(players.keys())
+
+        with open(f"updated_current_player_info.txt", "w") as f:
+            for player_id in player_ids:
+                player = players[player_id]
+                try:
+                    if player['team'] is not None and int(player['search_rank']) <= 750:
+                        f.write(str(player))
+                        f.write("\n")
+                except Exception as e:
+                    print("Search Rank not found...")

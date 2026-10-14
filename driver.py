@@ -3,53 +3,42 @@ from gemini import Gemini
 from sleeper import SleeperData
 import time
 
-sleeper = SleeperData("Jelf", "1407863657043353600", "1413350612417916928")
+sleeper = SleeperData("Jelf", "1407863657043353600", "1415899504514760704", 4)
 gemini = Gemini()
 
 def main():
 
     print("*** Welcome to the Fantasy Draft Helper ***")
     end_program = False
-    prev_round_number = -1
-
 
     while not end_program:
-        user_input = input("\nWould you like your next pick suggestion? (Enter Y to Continue): ")
 
-        if user_input.lower() == "y":
+        combined_data = retrieveSleeperData()
 
-            new_round_data = False
+        if combined_data:
+            input("Ready to Draft! Hit enter to get suggested picks")
 
-            print("Retrieving Sleeper Data...")
-
-            sleeper_request_counter = 0
-
-            while not new_round_data:
-                combined_data = retrieveSleeperData(prev_round_number)
-
-                if combined_data:
-                    gemini.suggest_pick(combined_data)
-                    prev_round_number += 1
-                    new_round_data = True
-                else:
-                    if sleeper_request_counter == 5:
-                        print("Sorry, please try again, new draft data not found...")
-                        new_round_data = True
-                    else:
-                        print("New data still not found...")
-                        sleeper_request_counter += 1
-                        time.sleep(5)
+            print("Getting info from gemini...")
+            gemini.suggest_pick(combined_data)
+            time.sleep(45)
 
 
 
-
-
-def retrieveSleeperData(prev_round_number):
+def retrieveSleeperData():
     draft_picks = sleeper.getDraftPicks()
-    round_number = draft_picks[-1]['round']
 
-    if round_number == prev_round_number:
-        return False
+    if draft_picks:
+        current_draft_slot = draft_picks[-1]['draft_slot']
+        print(f"Draft picks -1: {draft_picks[-1]}")
+    else:
+        current_draft_slot = 1
+
+    draft_slot_difference = abs(sleeper.getDraftOrder() - current_draft_slot)
+
+    if draft_slot_difference > 1:
+        print(f"Waiting for {0.5} second...")
+        time.sleep(0.5)
+        return None
 
     else:
         user_data = str(sleeper.getUserData())
@@ -57,8 +46,6 @@ def retrieveSleeperData(prev_round_number):
         draft_data = str(sleeper.getDraftData())
 
         combined_data = user_data + league_data + draft_data + str(draft_picks)
-
-        print(round_number)
 
         with open("stats.txt", "w") as f:
             f.write(f"User Data: {user_data}\n")
