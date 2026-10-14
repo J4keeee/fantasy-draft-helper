@@ -3,7 +3,7 @@ from gemini import Gemini
 from sleeper import SleeperData
 import time
 
-sleeper = SleeperData("Jelf", "1407863657043353600", "1415899504514760704", 4)
+sleeper = SleeperData("J4ke117", "1407863657043353600", "1416073162810003456", 5)
 gemini = Gemini()
 
 def main():
@@ -13,19 +13,18 @@ def main():
 
     while not end_program:
 
-        combined_data = retrieveSleeperData()
+        combined_data, drafted_players = retrieveSleeperData()
 
         if combined_data:
             input("Ready to Draft! Hit enter to get suggested picks")
 
             print("Getting info from gemini...")
-            gemini.suggest_pick(combined_data)
+            gemini.suggest_pick(combined_data, drafted_players=drafted_players)
             time.sleep(45)
-
-
 
 def retrieveSleeperData():
     draft_picks = sleeper.getDraftPicks()
+    drafted_players = sleeper.getDraftedPlayers(draft_picks)
 
     if draft_picks:
         current_draft_slot = draft_picks[-1]['draft_slot']
@@ -38,7 +37,7 @@ def retrieveSleeperData():
     if draft_slot_difference > 1:
         print(f"Waiting for {0.5} second...")
         time.sleep(0.5)
-        return None
+        return None, None
 
     else:
         user_data = str(sleeper.getUserData())
@@ -53,7 +52,7 @@ def retrieveSleeperData():
             f.write(f"Draft Data: {draft_data}\n")
             f.write(f"Draft Picks: {draft_picks}\n")
 
-        return combined_data
+        return combined_data, drafted_players
 
 
 if __name__ == '__main__':

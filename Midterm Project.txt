@@ -15,3 +15,4 @@
 	3. Our project in action.
 	4. Data/Code behind the program
 	5. Future of the project/Reflections
+- Add a requirements.txt and make a proper readme with instructions

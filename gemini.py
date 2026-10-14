@@ -8,13 +8,13 @@ class Gemini:
     __start_of_season_data = None
     __current_season_data = None
 
-
     def __init__(self):
         self.initialize()
 
     def initialize(self):
         self.setClient(genai.Client(api_key="AQ.Ab8RN6IAioGw-XkvBVo2dl85iTWXUeoBk415mYem6d6j6t_0Mg"))
-        self.setSystemPrompt("""You are a NFL fantasy draft expert, your goal is to provide the user with a fantasy football lineup with the best chance of winning the season
+        self.setSystemPrompt(
+                                """You are a NFL fantasy draft expert, your goal is to provide the user with a fantasy football lineup with the best chance of winning the season
                                 Follow these rules:
                                     - Provide the user with three options and specific player names/positions
                                     - Provide a few concise bullet points for why the user should choose those players
@@ -29,34 +29,48 @@ class Gemini:
                                     - Do not suggest a player which has already been chosen in the provided draft picks
                                     - You only know information about football, don't answer anything that doesn't have to do with the NFL, NFL players, or Fantasy Football.
                                     - Your goal is not to answer problems directly, it is to suggest players.
-                                    """)
+                                    """
+                            )
 
         self.setStartOfSeasonData(self.getClient().files.upload(file="football.csv"))
         self.setCurrentSeasonData(self.getClient().files.upload(file="updated_current_player_info.txt"))
 
-
-    def interact(self, user_input=""):
+    def interact(self, user_input="", blacklist=""):
         start_of_season_data = self.getStartOfSeasonData()
         current_season_data = self.getCurrentSeasonData()
 
         interaction = self.getClient().interactions.create(
-            system_instruction = self.getSystemPrompt(),
+            system_instruction = self.getSystemPrompt() + blacklist,
             model="gemini-3.5-flash-lite",
             input = [
                         {"type": "document", "uri":start_of_season_data.uri, "mime_type": self.getStartOfSeasonData().mime_type},
                         {"type": "document", "uri":current_season_data.uri, "mime_type": current_season_data.mime_type},
                         {"type": "text", "text": user_input}
-
                     ]
         )
 
         print(interaction.output_text)
 
-    def suggest_pick(self, sleeper_data = "", user_prompt = None):
+    def suggest_pick(self, sleeper_data="", user_prompt=None, drafted_players=None):
         prompt = f"Suggest the next pick for the user given the information given and the current draft information:\n\n{sleeper_data}\n The user may provide additional input, if so it is given here:\n{user_prompt}."
-        self.interact(prompt)
+        self.interact(prompt, self.buildBlacklistPrompt(drafted_players or []))
 
+    def buildBlacklistPrompt(self, drafted_players) -> str:
+        def line(p):
+            return f"- {p['name']} ({p['position']}, {p['team']}, id {p['player_id']})"
 
+        taken = "\n".join(line(p) for p in drafted_players) or "- (none yet)"
+        mine = "\n".join(line(p) for p in drafted_players if p["is_mine"]) or "- (none yet)"
+
+        return  f"""
+                    UNAVAILABLE PLAYERS - already drafted, NEVER suggest any of these ({len(drafted_players)} total):
+                    {taken}
+
+                    USER'S ROSTER SO FAR (consider positional needs; these are also unavailable):
+                    {mine}
+                """
+
+    # GETTERS AND SETTERS
     def getClient(self) -> genai.Client:
         return self.__client
 
