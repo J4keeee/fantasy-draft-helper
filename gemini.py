@@ -35,7 +35,7 @@ class Gemini:
         self.setStartOfSeasonData(self.getClient().files.upload(file="football.csv"))
         self.setCurrentSeasonData(self.getClient().files.upload(file="updated_current_player_info.txt"))
 
-    def interact(self, user_input="", blacklist=""):
+    def interact(self, prompt="", blacklist=""):
         start_of_season_data = self.getStartOfSeasonData()
         current_season_data = self.getCurrentSeasonData()
 
@@ -45,17 +45,17 @@ class Gemini:
             input = [
                         {"type": "document", "uri":start_of_season_data.uri, "mime_type": self.getStartOfSeasonData().mime_type},
                         {"type": "document", "uri":current_season_data.uri, "mime_type": current_season_data.mime_type},
-                        {"type": "text", "text": user_input}
+                        {"type": "text", "text": prompt}
                     ]
         )
 
         print(interaction.output_text)
 
-    def suggest_pick(self, sleeper_data="", user_prompt=None, drafted_players=None):
-        prompt = f"Suggest the next pick for the user given the information given and the current draft information:\n\n{sleeper_data}\n The user may provide additional input, if so it is given here:\n{user_prompt}."
-        self.interact(prompt, self.buildBlacklistPrompt(drafted_players or []))
+    def suggest_pick(self, user_prompt=None, drafted_players=None, roster_positions=None):
+        prompt = f"Suggest the next pick for the user with the NFL season information given. The user may provide additional input, if so it is given here:\n{user_prompt}."
+        self.interact(prompt, self.buildBlacklistPrompt(drafted_players or [], roster_positions))
 
-    def buildBlacklistPrompt(self, drafted_players) -> str:
+    def buildBlacklistPrompt(self, drafted_players, roster_positions) -> str:
         def line(p):
             return f"- {p['name']} ({p['position']}, {p['team']}, id {p['player_id']})"
 
@@ -68,6 +68,9 @@ class Gemini:
 
                     USER'S ROSTER SO FAR (consider positional needs; these are also unavailable):
                     {mine}
+                    
+                    ROSTER POSITIONS - Make sure that the user's roster meets the roster needs:
+                    {roster_positions}
                 """
 
     # GETTERS AND SETTERS

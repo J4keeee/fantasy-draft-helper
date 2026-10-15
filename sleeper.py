@@ -6,13 +6,11 @@ class SleeperData:
     __user_name = None
     __league_id = None
     __draft_id = None
-    __draft_order = -1
 
-    def __init__(self, user_name="", league_id="", draft_id="", draft_order = -1):
+    def __init__(self, user_name="", league_id="", draft_id=""):
         self.setUserName(user_name)
         self.setLeagueId(league_id)
         self.setDraftId(draft_id)
-        self.setDraftOrder(draft_order)
 
     # HELPERS
     def getUserData(self) -> str:
@@ -54,6 +52,56 @@ class SleeperData:
 
         return drafted
 
+    def getRosterPositions(self) -> str:
+        """The positions that will need to be filled in the user's roster"""
+        league_data = self.getLeagueData()
+        roster_positions = league_data['roster_positions']
+
+        return roster_positions
+
+    def getDraftOrder(self) -> int:
+        """The order which the user will draft in each round"""
+        draft_data = self.getDraftData()
+        draft_order_key = draft_data['draft_order'].keys()
+
+        for key in draft_order_key:
+            draft_order = int(draft_data['draft_order'][key])
+
+        return draft_order
+
+    def getRounds(self) -> int:
+        """The number of rounds in the draft"""
+        draft_data = self.getDraftData()
+        draft_settings = draft_data['settings']
+        rounds = int(draft_settings['rounds'])
+
+        return rounds
+
+    def getPickNumber(self) -> int:
+        """The current pick number in the draft"""
+        draft_picks = self.getDraftPicks()
+
+        if draft_picks is None:
+            pick_number = 1
+        else:
+            current_pick = draft_picks[-1]
+            pick_number = int(current_pick['pick_no']) + 1
+
+        return pick_number
+
+    def getCurrentRound(self) -> int:
+        """The current round in the draft"""
+        draft_picks = self.getDraftPicks()
+
+        if draft_picks is None:
+            current_round = 1
+        else:
+            current_pick = draft_picks[-1]
+            current_round = int(current_pick['round'])
+
+        return current_round
+
+
     def saveAllPlayers(self) -> None:
         """Only use once a day to generate daily info"""
         data_request = requests.get(f"https://api.sleeper.app/v1/players/nfl?active=true")
@@ -61,6 +109,7 @@ class SleeperData:
             f.write(str(data_request.json()))
 
     def filterPlayersFile(self):
+        """Filters the player list so that it is more mangable for the agent to process"""
         with open("updated_players.txt", "r") as f:
             players_file = f.read()
         players = ast.literal_eval(players_file)
@@ -86,9 +135,6 @@ class SleeperData:
     def getDraftId(self):
         return self.__draft_id
 
-    def getDraftOrder(self):
-        return self.__draft_order
-
     def setUserName(self, user_name):
         self.__user_name = user_name
 
@@ -97,6 +143,3 @@ class SleeperData:
 
     def setDraftId(self, draft_id):
         self.__draft_id = draft_id
-
-    def setDraftOrder(self, draft_order):
-        self.__draft_order = draft_order
