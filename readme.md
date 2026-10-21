@@ -5,7 +5,7 @@ A desktop app that follows your live Sleeper fantasy football draft and uses Goo
 ## What you need
 
 - **A Sleeper account** This project only works for fantays drafts through sleeper. You will need at least your username as well as the *draftId*
-    - The *draftId* can be found in the URL of a current draft, in https://sleeper.com/draft/nfl/1418530714927837184?ftue=commish, 1418530714927837184 would be the *draftId*
+    - The *draftId* can be found in the URL of a current draft, in `https://sleeper.com/draft/nfl/1418530714927837184?ftue=commish`, 1418530714927837184 would be the *draftId*
 
 ## Setup
 
