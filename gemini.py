@@ -34,10 +34,10 @@ class Gemini:
                                     """
                             )
 
-        self.setStartOfSeasonData(self.getClient().files.upload(file="football.csv"))
-        self.setCurrentSeasonData(self.getClient().files.upload(file="updated_current_player_info.txt"))
+        self.setStartOfSeasonData(self.getClient().files.upload(file="data/football.csv"))
+        self.setCurrentSeasonData(self.getClient().files.upload(file="data/updated_current_player_info.txt"))
 
-    def interact(self, prompt:str="", blacklist:str="") -> None:
+    def interact(self, prompt:str="", blacklist:str="") -> str:
         """Grabs information relevant to the draft alongside the incoming prompt and sends it to the agent.
 
         Args:
@@ -55,13 +55,13 @@ class Gemini:
                         {"type": "document", "uri":start_of_season_data.uri, "mime_type": self.getStartOfSeasonData().mime_type},
                         {"type": "document", "uri":current_season_data.uri, "mime_type": current_season_data.mime_type},
                         {"type": "text", "text": prompt}
-                    ]
+                    ],
+                    generation_config={"thinking_level": "low"}
         )
 
-        print(interaction.output_text)
+        return interaction.output_text
 
-
-    def suggest_pick(self, user_prompt=None, drafted_players=None, roster_positions=None) -> None:
+    def suggest_pick(self, user_prompt=None, drafted_players=None, roster_positions=None) -> str:
         """Sends a prompt to the agent requesting it to suggest a player.
 
         Args:
@@ -70,8 +70,8 @@ class Gemini:
             roster_positions:  The draft positions that need to be filled.
         """
         prompt = f"Suggest the next pick for the user with the NFL season information given. The user may provide additional input, if so it is given here:\n{user_prompt}."
-        self.interact(prompt, self.buildBlacklistPrompt(drafted_players or [], roster_positions))
 
+        return self.interact(prompt, self.buildBlacklistPrompt(drafted_players or [], roster_positions))
 
     def buildBlacklistPrompt(self, drafted_players, roster_positions) -> str:
         """Creates a system prompt for what players the user has drafted, what players have been chosen by other users, and what positions need to be filled.
