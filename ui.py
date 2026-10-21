@@ -1,4 +1,9 @@
 """
+AI CODE
+Agent Name: Claude 
+Model Name: Sonnet 5.5
+Use: The entire interface/ui was written by AI as per the midterm project guidelines
+
 ui.py - a simple window for the fantasy draft helper.
 
 Put this next to sleeper.py, DraftInfo.py, gemini.py and the data/ folder, then run:
@@ -482,3 +487,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+End AI CODE
+"""
